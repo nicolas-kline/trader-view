@@ -1,14 +1,14 @@
-name: traderview
+name: trader-view
 region: nyc
 
 services:
   - name: web
     github:
-      repo: your-username/traderview
+      repo: nicolas-kline/trader-view
       branch: main
       deploy_on_push: true
-    build_command: npx prisma generate && npm run build
-    run_command: npx prisma migrate deploy && npm start
+    build_command: npm ci && npx prisma generate && npm run build
+    run_command: npx prisma migrate deploy && node .next/standalone/server.js
     environment_slug: node-js
     http_port: 3000
     instance_count: 1
@@ -39,7 +39,7 @@ services:
       - key: FRED_API_KEY
         scope: RUN_TIME
         type: SECRET
-      - key: ALPACA_VANTAGE_API_KEY
+      - key: ALPHA_VANTAGE_API_KEY
         scope: RUN_TIME
         type: SECRET
       - key: FINNHUB_API_KEY
@@ -48,19 +48,31 @@ services:
       - key: CRON_SECRET
         scope: RUN_TIME
         type: SECRET
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        type: GENERAL
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        scope: RUN_AND_BUILD_TIME
+        type: GENERAL
       - key: NODE_ENV
         value: production
         scope: RUN_AND_BUILD_TIME
+      - key: HOSTNAME
+        value: "0.0.0.0"
+        scope: RUN_TIME
+      - key: PORT
+        value: "3000"
+        scope: RUN_TIME
 
 jobs:
   - name: trading-engine
     github:
-      repo: your-username/traderview
+      repo: nicolas-kline/trader-view
       branch: main
-    build_command: npx prisma generate && npm run build
+    build_command: npm ci && npx prisma generate && npm run build
     run_command: node scripts/cron-trigger.js
     environment_slug: node-js
-    instance_size_slug: apps-s-1vcpu-512mb
+    instance_size_slug: apps-s-1vcpu-1gb
     kind: SCHEDULED
     schedule:
       cron: "0 * * * *"
