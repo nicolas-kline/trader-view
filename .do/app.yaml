@@ -64,23 +64,6 @@ services:
         value: "3000"
         scope: RUN_TIME
 
-jobs:
-  - name: trading-engine
-    github:
-      repo: nicolas-kline/trader-view
-      branch: main
-    build_command: echo "no build needed"
-    run_command: node scripts/cron-trigger.mjs
-    environment_slug: node-js
-    instance_size_slug: apps-s-1vcpu-1gb
-    kind: SCHEDULED
-    schedule:
-      cron: "0 * * * *"
-      time_zone: America/Chicago
-    envs:
-      - key: CRON_SECRET
-        scope: RUN_TIME
-        type: SECRET
-      - key: APP_URL
-        value: ${web.PUBLIC_URL}
-        scope: RUN_TIME
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DEPLOYMENT_LIVE
