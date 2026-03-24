@@ -36,7 +36,8 @@ export async function updateSession(request: NextRequest) {
   const isPublicPath =
     pathname === '/login' ||
     pathname.startsWith('/auth/') ||
-    pathname === '/api/cron'; // Cron endpoint uses CRON_SECRET, not user auth
+    pathname === '/api/cron' || // Cron endpoint uses CRON_SECRET, not user auth
+    pathname === '/api/health'; // Health check for DO App Platform
 
   if (!user && !isPublicPath) {
     // Not logged in → redirect to login (for pages) or return 401 (for API)
