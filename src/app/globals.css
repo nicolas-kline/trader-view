@@ -46,6 +46,10 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-trading-green: var(--trading-green);
+  --color-trading-red: var(--trading-red);
+  --color-trading-yellow: var(--trading-yellow);
+  --color-trading-blue: var(--trading-blue);
 }
 
 :root {
@@ -115,6 +119,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --trading-green: oklch(0.72 0.19 145);
+  --trading-red: oklch(0.65 0.2 25);
+  --trading-yellow: oklch(0.8 0.15 85);
+  --trading-blue: oklch(0.7 0.15 250);
 }
 
 @layer base {

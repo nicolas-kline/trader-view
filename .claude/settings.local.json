@@ -7,7 +7,19 @@
       "Bash(yes \"\")",
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --no-import-alias --use-npm --turbopack)",
       "Bash(npm install:*)",
-      "Bash(npx shadcn@latest init -d)"
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(npx shadcn@latest add card badge table tabs select input switch slider separator tooltip dialog dropdown-menu skeleton -y)",
+      "Bash(npx prisma:*)",
+      "Bash(find /Users/nicolaskline/code/haystack/traderview/src/app/api -name *.ts -o -name *.tsx)",
+      "Bash(find /Users/nicolaskline/code/haystack/traderview/src/hooks -name *.ts -o -name *.tsx)",
+      "Bash(node -e \"const p = require\\(''/Users/nicolaskline/code/haystack/traderview/node_modules/zod/package.json''\\); console.log\\(p.version, p.exports ? JSON.stringify\\(Object.keys\\(p.exports\\)\\) : ''no exports''\\)\")",
+      "Bash(node -e \"const z = require\\(''/Users/nicolaskline/code/haystack/traderview/node_modules/zod''\\); try { z.object\\({a: z.string\\(\\)}\\).parse\\({a: 1}\\); } catch\\(e\\) { console.log\\(''instanceof ZodError:'', e instanceof z.ZodError\\); console.log\\(''constructor name:'', e.constructor.name\\); console.log\\(''has issues:'', ''issues'' in e\\); }\")",
+      "Bash(node -e \"const z = require\\(''/Users/nicolaskline/code/haystack/traderview/node_modules/zod''\\); try { z.object\\({a: z.string\\(\\)}\\).parse\\({a: 1}\\); } catch\\(e\\) { console.log\\(''has .errors:'', ''errors'' in e\\); console.log\\(''has .issues:'', ''issues'' in e\\); console.log\\(''.errors value:'', JSON.stringify\\(e.errors\\)\\); }\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(curl -s http://localhost:3000/api/engine/run -X POST -H \"Content-Type: application/json\")",
+      "Bash(curl -s http://localhost:3000/api/account)",
+      "Bash(python3 -m json.tool)"
     ]
   }
 }

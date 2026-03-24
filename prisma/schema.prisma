@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum TradingMode {
+  PAPER
+  LIVE
+}
+
+enum TradeAction {
+  BUY
+  SELL
+  HOLD
+}
+
+enum TradeStatus {
+  PENDING
+  FILLED
+  PARTIALLY_FILLED
+  CANCELLED
+  FAILED
+}
+
+model Settings {
+  id                  String      @id @default("singleton")
+  mode                TradingMode @default(PAPER)
+  tradeFrequencyHours Int         @default(24)
+  buyThreshold        Float       @default(0.3)
+  sellThreshold       Float       @default(-0.3)
+  maxPositionPct      Float       @default(0.95)
+  minTradeUsd         Float       @default(10.0)
+  signalWeights       Json
+  enabledSignals      String[]
+  lastEngineRun       DateTime?
+  lastEngineStatus    String?
+  lastEngineMessage   String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+}
+
+model Signal {
+  id              String      @id @default(cuid())
+  name            String
+  rawValue        Float
+  normalizedValue Float
+  metadata        Json?
+  source          String
+  fetchedAt       DateTime    @default(now())
+  predictionId    String?
+  prediction      Prediction? @relation(fields: [predictionId], references: [id])
+
+  @@index([name, fetchedAt])
+  @@index([predictionId])
+}
+
+model Prediction {
+  id                 String      @id @default(cuid())
+  compositeScore     Float
+  confidence         Float
+  action             TradeAction
+  reasoning          String
+  signalSnapshot     Json
+
+  priceAtPrediction  Float
+  priceAfter1h       Float?
+  priceAfter4h       Float?
+  priceAfter24h      Float?
+  outcomeCorrect     Boolean?
+  actualReturn       Float?
+
+  signals            Signal[]
+  trade              Trade?
+
+  createdAt          DateTime    @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+model Trade {
+  id                String      @id @default(cuid())
+  mode              TradingMode
+  action            TradeAction
+  symbol            String      @default("ETH/USD")
+  status            TradeStatus
+  orderId           String?
+  requestedQty      Float?
+  requestedNotional Float?
+  filledQty         Float?
+  filledPrice       Float?
+  filledNotional    Float?
+  entryPrice        Float?
+  exitPrice         Float?
+  realizedPnl       Float?
+  realizedPnlPct    Float?
+  predictionId      String?     @unique
+  prediction        Prediction? @relation(fields: [predictionId], references: [id])
+  alpacaResponse    Json?
+  errorMessage      String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([mode, createdAt])
+  @@index([status])
+  @@index([symbol])
+}
+
+model PortfolioSnapshot {
+  id            String      @id @default(cuid())
+  mode          TradingMode
+  equity        Float
+  cash          Float
+  positionValue Float
+  positionQty   Float
+  ethPrice      Float
+  dayPnl        Float
+  totalPnl      Float
+  totalPnlPct   Float
+  snapshotAt    DateTime    @default(now())
+
+  @@index([mode, snapshotAt])
+}
+
+model SignalPerformance {
+  id                    String   @id @default(cuid())
+  signalName            String
+  periodDays            Int
+  totalPredictions      Int
+  correctPredictions    Int
+  accuracy              Float
+  avgContribution       Float
+  correlationWithReturn Float
+  evaluatedAt           DateTime @default(now())
+
+  @@unique([signalName, periodDays, evaluatedAt])
+  @@index([signalName])
+}

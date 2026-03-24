@@ -1,0 +1,74 @@
+name: traderview
+region: nyc
+
+services:
+  - name: web
+    github:
+      repo: your-username/traderview
+      branch: main
+      deploy_on_push: true
+    build_command: npx prisma generate && npm run build
+    run_command: npx prisma migrate deploy && npm start
+    environment_slug: node-js
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 15
+      period_seconds: 30
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: DIRECT_URL
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: ALPACA_PAPER_KEY_ID
+        scope: RUN_TIME
+        type: SECRET
+      - key: ALPACA_PAPER_SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: ALPACA_LIVE_KEY_ID
+        scope: RUN_TIME
+        type: SECRET
+      - key: ALPACA_LIVE_SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: FRED_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: ALPACA_VANTAGE_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: FINNHUB_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: CRON_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: NODE_ENV
+        value: production
+        scope: RUN_AND_BUILD_TIME
+
+jobs:
+  - name: trading-engine
+    github:
+      repo: your-username/traderview
+      branch: main
+    build_command: npx prisma generate && npm run build
+    run_command: node scripts/cron-trigger.js
+    environment_slug: node-js
+    instance_size_slug: apps-s-1vcpu-512mb
+    kind: SCHEDULED
+    schedule:
+      cron: "0 * * * *"
+      time_zone: America/Chicago
+    envs:
+      - key: CRON_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: APP_URL
+        value: ${web.PUBLIC_URL}
+        scope: RUN_TIME
