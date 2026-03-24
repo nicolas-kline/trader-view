@@ -1,15 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   ArrowLeftRight,
   Activity,
   TrendingUp,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -21,11 +23,19 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   };
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  }
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 flex w-16 flex-col items-center border-r border-border bg-[#0a0a0f]">
@@ -53,7 +63,14 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="pb-4">
+      <div className="flex flex-col items-center gap-3 pb-4">
+        <button
+          onClick={handleSignOut}
+          title="Sign Out"
+          className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:text-trading-red transition-colors"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
         <span className="text-xs font-bold tracking-widest text-muted-foreground">
           TV
         </span>
