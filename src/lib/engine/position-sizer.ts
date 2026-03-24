@@ -1,4 +1,4 @@
-import { TradeAction } from '@/generated/prisma';
+import { TradeAction } from '@prisma/client';
 import { OrderSize } from './types';
 
 interface SizerParams {

@@ -1,4 +1,4 @@
-import { TradeAction } from '@/generated/prisma';
+import { TradeAction } from '@prisma/client';
 import { SignalResult } from '@/lib/signals/types';
 import { PredictionResult } from './types';
 

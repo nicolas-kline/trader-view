@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/utils/logger';
 import { AlpacaClient } from '@/lib/trader/alpaca-client';
-import { TradingMode } from '@/generated/prisma';
+import { TradingMode } from '@prisma/client';
 
 /**
  * Takes a point-in-time snapshot of the portfolio state

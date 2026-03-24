@@ -7,7 +7,7 @@ import { checkRisk } from '@/lib/trader/risk-manager';
 import { executeOrder } from '@/lib/trader/order-executor';
 import { takeSnapshot } from './snapshot-taker';
 import { SignalResult } from '@/lib/signals/types';
-import { TradingMode } from '@/generated/prisma';
+import { TradingMode } from '@prisma/client';
 
 interface EngineRunResult {
   action: string;
@@ -106,14 +106,14 @@ export async function runEngine(): Promise<EngineRunResult> {
       confidence: prediction.confidence,
       action: prediction.action,
       reasoning: prediction.reasoning,
-      signalSnapshot: prediction.signalSnapshot as unknown as import('@/generated/prisma').Prisma.InputJsonValue,
+      signalSnapshot: prediction.signalSnapshot as unknown as import('@prisma/client').Prisma.InputJsonValue,
       priceAtPrediction: ethPrice,
       signals: {
         create: signals.map((s) => ({
           name: s.name,
           rawValue: s.rawValue,
           normalizedValue: s.normalizedValue,
-          metadata: (s.metadata ?? undefined) as Record<string, unknown> as import('@/generated/prisma').Prisma.InputJsonValue | undefined,
+          metadata: (s.metadata ?? undefined) as Record<string, unknown> as import('@prisma/client').Prisma.InputJsonValue | undefined,
           source: s.source,
           fetchedAt: s.fetchedAt,
         })),
@@ -181,7 +181,7 @@ export async function runEngine(): Promise<EngineRunResult> {
             filledQty: tradeRecord.filledQty,
             filledPrice: tradeRecord.filledPrice,
             filledNotional: tradeRecord.filledNotional,
-            alpacaResponse: (tradeRecord.alpacaResponse ?? undefined) as import('@/generated/prisma').Prisma.InputJsonValue | undefined,
+            alpacaResponse: (tradeRecord.alpacaResponse ?? undefined) as import('@prisma/client').Prisma.InputJsonValue | undefined,
             errorMessage: tradeRecord.errorMessage,
             predictionId: predictionRecord.id,
           },

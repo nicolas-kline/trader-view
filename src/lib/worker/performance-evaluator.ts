@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/utils/logger';
 import { AlpacaClient } from '@/lib/trader/alpaca-client';
-import { TradingMode } from '@/generated/prisma';
+import { TradingMode } from '@prisma/client';
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const FOUR_HOURS_MS = 4 * ONE_HOUR_MS;

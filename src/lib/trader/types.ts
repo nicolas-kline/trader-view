@@ -15,6 +15,7 @@ export interface AlpacaPosition {
   current_price: string;
   unrealized_pl: string;
   unrealized_plpc: string;
+  side: string;
 }
 
 export interface AlpacaOrder {

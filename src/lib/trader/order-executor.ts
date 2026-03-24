@@ -1,4 +1,4 @@
-import { TradeAction, TradingMode, TradeStatus } from '@/generated/prisma';
+import { TradeAction, TradingMode, TradeStatus } from '@prisma/client';
 import { logger } from '@/lib/utils/logger';
 import { OrderSize } from '@/lib/engine/types';
 import { AlpacaClient } from './alpaca-client';

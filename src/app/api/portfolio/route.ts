@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { TradingMode } from '@/generated/prisma';
+import { TradingMode } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
