@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { updateCronSchedule, getCronSchedule } from '@/lib/db/cron';
 import { z } from 'zod';
 
 const updateSettingsSchema = z.object({
@@ -15,15 +16,16 @@ const updateSettingsSchema = z.object({
 
 export async function GET() {
   try {
-    const settings = await prisma.settings.findUnique({
-      where: { id: 'singleton' },
-    });
+    const [settings, cronStatus] = await Promise.all([
+      prisma.settings.findUnique({ where: { id: 'singleton' } }),
+      getCronSchedule().catch(() => null),
+    ]);
 
     if (!settings) {
       return NextResponse.json({ error: 'Settings not found' }, { status: 404 });
     }
 
-    return NextResponse.json(settings);
+    return NextResponse.json({ ...settings, cronSchedule: cronStatus });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
@@ -39,6 +41,20 @@ export async function PUT(request: NextRequest) {
       where: { id: 'singleton' },
       data: parsed,
     });
+
+    // If frequency changed, sync the pg_cron schedule in Supabase
+    if (parsed.tradeFrequencyHours !== undefined) {
+      try {
+        await updateCronSchedule(parsed.tradeFrequencyHours);
+      } catch (cronErr) {
+        console.error('Failed to update pg_cron schedule:', cronErr);
+        // Still return success — the DB setting is saved, cron just didn't sync
+        return NextResponse.json({
+          ...updated,
+          cronWarning: 'Setting saved but pg_cron schedule failed to update. Check Supabase pg_cron setup.',
+        });
+      }
+    }
 
     return NextResponse.json(updated);
   } catch (error) {

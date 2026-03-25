@@ -2,6 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+interface CronSchedule {
+  schedule: string;
+  active: boolean;
+}
+
 interface Settings {
   id: string;
   mode: 'PAPER' | 'LIVE';
@@ -15,6 +20,8 @@ interface Settings {
   lastEngineRun: string | null;
   lastEngineStatus: string | null;
   lastEngineMessage: string | null;
+  cronSchedule?: CronSchedule | null;
+  cronWarning?: string;
 }
 
 export function useSettings() {

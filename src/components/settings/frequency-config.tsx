@@ -36,6 +36,8 @@ export function FrequencyConfig() {
     }
   };
 
+  const cron = settings.cronSchedule as { schedule: string; active: boolean } | null;
+
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-3">
       <div>
@@ -59,6 +61,24 @@ export function FrequencyConfig() {
           ))}
         </SelectContent>
       </Select>
+
+      {/* Live cron status from Supabase */}
+      {cron ? (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span
+            className={`h-2 w-2 rounded-full ${cron.active ? 'bg-emerald-500' : 'bg-yellow-500'}`}
+          />
+          <span>
+            pg_cron: <code className="text-foreground/80">{cron.schedule}</code>
+            {cron.active ? '' : ' (paused)'}
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="h-2 w-2 rounded-full bg-red-500" />
+          <span>pg_cron: not configured</span>
+        </div>
+      )}
     </div>
   );
 }
