@@ -1,4 +1,8 @@
+import dns from 'dns';
 import pg from 'pg';
+
+// DO App Platform doesn't support IPv6 outbound — force IPv4 resolution
+dns.setDefaultResultOrder('ipv4first');
 
 const JOB_NAME = 'traderview-engine';
 
