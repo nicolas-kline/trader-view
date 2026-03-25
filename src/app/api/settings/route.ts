@@ -45,7 +45,10 @@ export async function PUT(request: NextRequest) {
     // If frequency changed, sync the pg_cron schedule in Supabase
     if (parsed.tradeFrequencyHours !== undefined) {
       try {
-        await updateCronSchedule(parsed.tradeFrequencyHours);
+        const origin = request.headers.get('x-forwarded-host')
+          ? `https://${request.headers.get('x-forwarded-host')}`
+          : new URL(request.url).origin;
+        await updateCronSchedule(parsed.tradeFrequencyHours, origin);
       } catch (cronErr) {
         console.error('Failed to update pg_cron schedule:', cronErr);
         // Still return success — the DB setting is saved, cron just didn't sync
