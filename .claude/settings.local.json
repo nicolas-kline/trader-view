@@ -35,7 +35,20 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" https://trader-view-s4obm.ondigitalocean.app/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://trader-view-s4obm.ondigitalocean.app/api/health)",
+      "Bash(curl -sI https://trader-view-s4obm.ondigitalocean.app/login)",
+      "Bash(curl -s https://trader-view-s4obm.ondigitalocean.app/login)",
+      "Bash(curl -sI \"https://trader-view-s4obm.ondigitalocean.app/_next/static/chunks/02i7dfk78~t~2.js\")",
+      "Bash(curl -s https://trader-view-s4obm.ondigitalocean.app/api/health)",
+      "Bash(curl -s https://trader-view-s4obm.ondigitalocean.app/api/settings)",
+      "Bash(/tmp/fixed-spec.yaml:*)",
+      "Bash(grep -r \"tailwind\\\\|@theme\\\\|font-family\" /Users/nicolaskline/code/haystack/traderview --include=*.config.*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm ls:*)",
+      "Bash(grep -c base-ui src/components/ui/*.tsx)",
+      "Bash(grep -v \":0$\")"
     ]
   }
 }

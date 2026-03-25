@@ -17,6 +17,7 @@ import type { Time } from 'lightweight-charts';
 interface Snapshot {
   id: string;
   equity: number;
+  ethPrice: number;
   snapshotAt: string;
 }
 
@@ -24,18 +25,29 @@ export function EquityCurve() {
   const { snapshots, loading: snapshotsLoading } = usePortfolio('PAPER', 200);
   const { account, loading: accountLoading } = useAccount();
 
-  const chartData = useMemo(() => {
+  const sorted = useMemo(() => {
     const typed = snapshots as Snapshot[];
-    return [...typed]
-      .sort(
-        (a, b) =>
-          new Date(a.snapshotAt).getTime() - new Date(b.snapshotAt).getTime()
-      )
+    return [...typed].sort(
+      (a, b) =>
+        new Date(a.snapshotAt).getTime() - new Date(b.snapshotAt).getTime()
+    );
+  }, [snapshots]);
+
+  const chartData = useMemo(() => {
+    return sorted.map((s) => ({
+      time: (Math.floor(new Date(s.snapshotAt).getTime() / 1000)) as Time,
+      value: s.equity,
+    }));
+  }, [sorted]);
+
+  const ethData = useMemo(() => {
+    return sorted
+      .filter((s) => s.ethPrice > 0)
       .map((s) => ({
         time: (Math.floor(new Date(s.snapshotAt).getTime() / 1000)) as Time,
-        value: s.equity,
+        value: s.ethPrice,
       }));
-  }, [snapshots]);
+  }, [sorted]);
 
   // Use live equity if we have it, otherwise fall back to latest snapshot
   const displayEquity = useMemo(() => {
@@ -64,7 +76,19 @@ export function EquityCurve() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Portfolio Value</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Portfolio Value</CardTitle>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block size-2 rounded-full bg-[#22c55e]" />
+              Portfolio
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block size-2 rounded-full bg-[#3b82f6]" />
+              ETH
+            </span>
+          </div>
+        </div>
         {displayEquity !== null && (
           <CardDescription>
             <span className="text-2xl font-bold font-mono text-foreground tabular-nums">
@@ -75,7 +99,12 @@ export function EquityCurve() {
       </CardHeader>
       <CardContent>
         {chartData.length > 0 ? (
-          <ChartContainer data={chartData} chartType="area" height={300} />
+          <ChartContainer
+            data={chartData}
+            chartType="area"
+            height={300}
+            overlayData={ethData}
+          />
         ) : (
           <div className="flex h-[300px] items-center justify-center text-muted-foreground text-sm">
             {displayEquity !== null

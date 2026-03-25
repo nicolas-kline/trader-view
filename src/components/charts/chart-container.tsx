@@ -11,9 +11,11 @@ import {
   type AreaSeriesPartialOptions,
   type CandlestickSeriesPartialOptions,
   type HistogramSeriesPartialOptions,
+  type LineSeriesPartialOptions,
   type AreaData,
   type CandlestickData,
   type HistogramData,
+  type LineData,
   type Time,
 } from 'lightweight-charts';
 
@@ -48,6 +50,8 @@ interface ChartContainerProps<T extends ChartType> {
     : T extends 'candlestick'
       ? CandlestickSeriesPartialOptions
       : HistogramSeriesPartialOptions;
+  overlayData?: LineData<Time>[];
+  overlayOptions?: LineSeriesPartialOptions;
 }
 
 export function ChartContainer<T extends ChartType>({
@@ -55,10 +59,13 @@ export function ChartContainer<T extends ChartType>({
   chartType,
   height = 300,
   seriesOptions,
+  overlayData,
+  overlayOptions,
 }: ChartContainerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);
+  const overlayRef = useRef<ISeriesApi<SeriesType> | null>(null);
   const [ready, setReady] = useState(false);
 
   // Dynamic import and chart creation
@@ -75,6 +82,12 @@ export function ChartContainer<T extends ChartType>({
         width: containerRef.current.clientWidth,
         height,
         handleScroll: { vertTouchDrag: false },
+        ...(overlayData?.length ? {
+          leftPriceScale: {
+            visible: true,
+            borderColor: '#374151',
+          },
+        } : {}),
       });
 
       let series: ISeriesApi<SeriesType>;
@@ -103,6 +116,17 @@ export function ChartContainer<T extends ChartType>({
         });
       }
 
+      // Add overlay line series on the left price scale
+      if (overlayData?.length) {
+        const overlay = chart.addSeries(lc.LineSeries, {
+          color: '#3b82f6',
+          lineWidth: 2,
+          priceScaleId: 'left',
+          ...overlayOptions,
+        });
+        overlayRef.current = overlay;
+      }
+
       chartRef.current = chart;
       seriesRef.current = series;
       setReady(true);
@@ -114,6 +138,7 @@ export function ChartContainer<T extends ChartType>({
         chartRef.current.remove();
         chartRef.current = null;
         seriesRef.current = null;
+        overlayRef.current = null;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,8 +150,13 @@ export function ChartContainer<T extends ChartType>({
 
     // lightweight-charts expects data sorted by time ascending
     seriesRef.current.setData(data as Parameters<typeof seriesRef.current.setData>[0]);
+
+    if (overlayRef.current && overlayData?.length) {
+      overlayRef.current.setData(overlayData as Parameters<typeof overlayRef.current.setData>[0]);
+    }
+
     chartRef.current?.timeScale().fitContent();
-  }, [data, ready]);
+  }, [data, overlayData, ready]);
 
   // ResizeObserver for responsiveness
   useEffect(() => {
