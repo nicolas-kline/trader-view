@@ -1,17 +1,10 @@
-import dns from 'dns';
+import { lookup } from 'dns/promises';
 import pg from 'pg';
-
-// DO App Platform doesn't support IPv6 outbound — force IPv4 resolution
-dns.setDefaultResultOrder('ipv4first');
 
 const JOB_NAME = 'traderview-engine';
 
-/**
- * Convert tradeFrequencyHours → cron expression.
- *   1  → "0 * * * *"       (every hour)
- *   4  → "0 *​/4 * * *"     (every 4 hours)
- *   24 → "0 0 * * *"       (once a day at midnight)
- */
+// Convert tradeFrequencyHours to cron expression.
+// e.g. 1 -> every hour, 4 -> every 4 hours, 24 -> daily at midnight
 function hoursToCron(hours: number): string {
   if (hours <= 1) return '0 * * * *';
   if (hours >= 24) return '0 0 * * *';
@@ -20,11 +13,25 @@ function hoursToCron(hours: number): string {
 
 /**
  * Get a direct PG connection (bypasses pgbouncer).
- * pg_cron functions require a non-pooled connection.
+ * Explicitly resolves hostname to IPv4 because DO App Platform
+ * cannot route outbound IPv6.
  */
-function getDirectClient() {
+async function getDirectClient() {
   const url = process.env.DIRECT_URL || process.env.DATABASE_URL!;
-  return new pg.Client({ connectionString: url });
+  const parsed = new URL(url);
+  const originalHost = parsed.hostname;
+
+  // Resolve to IPv4 explicitly
+  const { address } = await lookup(originalHost, { family: 4 });
+  parsed.hostname = address;
+
+  return new pg.Client({
+    connectionString: parsed.toString(),
+    ssl: {
+      rejectUnauthorized: false,
+      servername: originalHost,
+    },
+  });
 }
 
 /**
@@ -33,7 +40,7 @@ function getDirectClient() {
  */
 export async function updateCronSchedule(hours: number, appUrl?: string): Promise<void> {
   const cron = hoursToCron(hours);
-  const client = getDirectClient();
+  const client = await getDirectClient();
 
   try {
     await client.connect();
@@ -79,7 +86,7 @@ export async function updateCronSchedule(hours: number, appUrl?: string): Promis
  * Get the current cron schedule from pg_cron (for display purposes).
  */
 export async function getCronSchedule(): Promise<{ schedule: string; active: boolean } | null> {
-  const client = getDirectClient();
+  const client = await getDirectClient();
 
   try {
     await client.connect();
