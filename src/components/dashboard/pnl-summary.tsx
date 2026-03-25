@@ -26,6 +26,7 @@ export function PnlSummary() {
   const { snapshots, loading } = usePortfolio('PAPER', 1000);
 
   const periods = useMemo<PeriodPnl[]>(() => {
+    if (!Array.isArray(snapshots)) return [];
     const typed = snapshots as Snapshot[];
     if (typed.length < 2) return [];
 

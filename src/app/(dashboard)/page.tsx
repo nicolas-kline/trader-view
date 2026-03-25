@@ -1,4 +1,5 @@
 import { EquityCurve } from "@/components/dashboard/equity-curve";
+import { PredictionScoreChart } from "@/components/dashboard/prediction-score-chart";
 import { PositionCard } from "@/components/dashboard/position-card";
 import { PnlSummary } from "@/components/dashboard/pnl-summary";
 import { SignalOverview } from "@/components/dashboard/signal-overview";
@@ -13,6 +14,9 @@ export default function DashboardPage() {
       </div>
       <div>
         <PositionCard />
+      </div>
+      <div className="lg:col-span-2">
+        <PredictionScoreChart />
       </div>
       <div>
         <PnlSummary />

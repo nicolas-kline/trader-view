@@ -26,6 +26,7 @@ export function EquityCurve() {
   const { account, loading: accountLoading } = useAccount();
 
   const sorted = useMemo(() => {
+    if (!Array.isArray(snapshots)) return [];
     const typed = snapshots as Snapshot[];
     return [...typed].sort(
       (a, b) =>
@@ -52,6 +53,7 @@ export function EquityCurve() {
   // Use live equity if we have it, otherwise fall back to latest snapshot
   const displayEquity = useMemo(() => {
     if (account?.equity) return account.equity;
+    if (!Array.isArray(snapshots)) return null;
     const typed = snapshots as Snapshot[];
     if (typed.length > 0) return typed[0].equity;
     return null;
