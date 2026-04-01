@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Card,
   CardHeader,
@@ -9,6 +9,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { ChartContainer } from '@/components/charts/chart-container';
 import { usePortfolio } from '@/hooks/use-portfolio';
 import { useAccount } from '@/hooks/use-account';
@@ -22,7 +23,9 @@ interface Snapshot {
 }
 
 export function EquityCurve() {
-  const { snapshots, loading: snapshotsLoading } = usePortfolio('PAPER', 200);
+  const [mode, setMode] = useState<'PAPER' | 'LIVE'>('LIVE');
+  const [period, setPeriod] = useState<'1d' | '7d' | '1m' | '3m'>('7d');
+  const { snapshots, loading: snapshotsLoading } = usePortfolio(mode, 1000, period);
   const { account, loading: accountLoading } = useAccount();
 
   const sorted = useMemo(() => {
@@ -34,20 +37,25 @@ export function EquityCurve() {
     );
   }, [snapshots]);
 
+  // Normalize both portfolio and ETH price to percentage change from start
   const chartData = useMemo(() => {
+    if (sorted.length === 0) return [];
+    const firstEquity = sorted[0].equity;
     return sorted.map((s) => ({
       time: (Math.floor(new Date(s.snapshotAt).getTime() / 1000)) as Time,
-      value: s.equity,
+      value: ((s.equity - firstEquity) / firstEquity) * 100,
     }));
   }, [sorted]);
 
   const ethData = useMemo(() => {
-    return sorted
-      .filter((s) => s.ethPrice > 0)
-      .map((s) => ({
-        time: (Math.floor(new Date(s.snapshotAt).getTime() / 1000)) as Time,
-        value: s.ethPrice,
-      }));
+    if (sorted.length === 0) return [];
+    const validSnapshots = sorted.filter((s) => s.ethPrice > 0);
+    if (validSnapshots.length === 0) return [];
+    const firstEthPrice = validSnapshots[0].ethPrice;
+    return validSnapshots.map((s) => ({
+      time: (Math.floor(new Date(s.snapshotAt).getTime() / 1000)) as Time,
+      value: ((s.ethPrice - firstEthPrice) / firstEthPrice) * 100,
+    }));
   }, [sorted]);
 
   // Use live equity if we have it, otherwise fall back to latest snapshot
@@ -98,6 +106,39 @@ export function EquityCurve() {
             </span>
           </CardDescription>
         )}
+        <div className="flex gap-3 mt-4">
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant={mode === 'PAPER' ? 'default' : 'outline'}
+              onClick={() => setMode('PAPER')}
+              className="text-xs"
+            >
+              PAPER
+            </Button>
+            <Button
+              size="sm"
+              variant={mode === 'LIVE' ? 'default' : 'outline'}
+              onClick={() => setMode('LIVE')}
+              className="text-xs"
+            >
+              LIVE
+            </Button>
+          </div>
+          <div className="flex gap-1">
+            {(['1d', '7d', '1m', '3m'] as const).map((p) => (
+              <Button
+                key={p}
+                size="sm"
+                variant={period === p ? 'default' : 'outline'}
+                onClick={() => setPeriod(p)}
+                className="text-xs"
+              >
+                {p}
+              </Button>
+            ))}
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {chartData.length > 0 ? (
